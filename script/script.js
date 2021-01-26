@@ -1,6 +1,6 @@
 const numberButtons = document.querySelectorAll('[data-number]');
 const operatorButtons = document.querySelectorAll('[data-operator]');
-const positiveNegativeButton = document.querySelectorAll(
+const positiveNegativeButton = document.querySelector(
   '[data-positive-negative]'
 );
 const equalsButton = document.querySelector('[data-equals]');
@@ -10,33 +10,53 @@ const previousDisplay = document.querySelector('[data-previous]');
 const currentDisplay = document.querySelector('[data-current]');
 
 let previousTotal = 0;
-let previousOperator = '';
+let operator = '';
 let currentNumber = '';
 
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function compute(num, operator) {
-  if (previousOperator !== '') {
+function compute() {
+  if (previousDisplay.innerText !== '') {
+    let computation;
+
     switch (operator) {
       case '÷':
-        previousTotal /= num;
-      case '&times;':
-        previousTotal *= num;
+        computation = previousTotal / Number(currentNumber);
+        break;
+      case '×':
+        computation = previousTotal * Number(currentNumber);
+        break;
       case '+':
-        previousTotal += num;
+        computation = previousTotal + Number(currentNumber);
+        break;
       case '-':
-        previousTotal -= num;
+        computation = previousTotal - Number(currentNumber);
+        break;
     }
+
+    if (!isFinite(computation)) {
+      computation = 0;
+    }
+
+    previousTotal = computation;
+  } else {
+    previousTotal = Number(currentNumber);
   }
-  previousOperator = operator;
-  currentDisplay.innerText = previousTotal.toString();
+  currentDisplay.innerText = previousTotal;
 }
 
-function updateDisplay(num, operator) {
-  previousDisplay.innerText += ` ${num} ${operator}`;
+function updateDisplay() {
+  previousDisplay.innerText += ` ${currentNumber} ${operator}`;
   currentNumber = '';
+}
+
+function clear() {
+  operator = null;
+  previousTotal = 0;
+  currentNumber = '';
+  previousDisplay.innerText = '';
 }
 
 numberButtons.forEach((button) => {
@@ -51,16 +71,20 @@ numberButtons.forEach((button) => {
 
 operatorButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    compute(Number(currentNumber), button.innerText);
-    updateDisplay(Number(currentNumber), button.innerText);
+    if (currentNumber !== '') {
+      compute();
+      operator = button.innerText;
+    }
+    updateDisplay();
   });
 });
 
 allClearButton.addEventListener('click', () => {
-  currentOperator = null;
-  previousTotal = 0;
-  previousOperator = '';
-  currentNumber = '';
-  previousDisplay.innerText = '';
+  clear();
   currentDisplay.innerText = '0';
+});
+
+equalsButton.addEventListener('click', () => {
+  compute();
+  clear();
 });
