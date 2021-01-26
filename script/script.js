@@ -79,6 +79,11 @@ operatorButtons.forEach((button) => {
   });
 });
 
+positiveNegativeButton.addEventListener('click', () => {
+  currentNumber = (Number(currentNumber) * -1).toString();
+  currentDisplay.innerText = formatNumber(currentNumber);
+});
+
 allClearButton.addEventListener('click', () => {
   clear();
   currentDisplay.innerText = '0';
